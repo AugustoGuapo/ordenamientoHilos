@@ -1,16 +1,17 @@
 package org.example.ordenamiento;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.CountDownLatch;
+import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
 public class Burbuja extends IOrdenamiento {
-    public Burbuja(JProgressBar barraProgreso, int[] vector) {
-        super(barraProgreso, vector);
+    
+    public Burbuja(JProgressBar barraProgreso, int[] vector, JLabel tiempo, CountDownLatch latch) {
+        super(barraProgreso, vector, tiempo, latch);
     }
 
     @Override
-    public void metodoOrdenamiento() {
+    public void algoritmoOrdenamiento() {
         int n = vector.length;
         int temp = 0;
         for (int i = 0; i < n; i++) {
@@ -23,7 +24,6 @@ public class Burbuja extends IOrdenamiento {
             }
             actualizarBarra(i);
         }
-        System.out.println("finalizado");
     }
 
 }

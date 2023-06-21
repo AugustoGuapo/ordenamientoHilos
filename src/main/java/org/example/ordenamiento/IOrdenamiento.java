@@ -1,56 +1,42 @@
 package org.example.ordenamiento;
 
-import javax.swing.JOptionPane;
+import java.util.concurrent.CountDownLatch;
+import javax.swing.JLabel;
 import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 
-public abstract class IOrdenamiento extends SwingWorker<Void, Integer>{
+public abstract class IOrdenamiento extends Thread{
     private final JProgressBar barraProgreso;
     protected int[] vector;
     protected int primerIndice;
+    protected JLabel tiempo;
+    protected CountDownLatch latch;
 
-    public IOrdenamiento(JProgressBar barraProgreso, int[] vector) {
+    public IOrdenamiento(JProgressBar barraProgreso, int[] vector, JLabel tiempo, CountDownLatch latch) {
         this.barraProgreso = barraProgreso;
         this.vector = vector;
+        this.tiempo = tiempo;
+        this.latch = latch;
     }
 
-    public abstract void metodoOrdenamiento();
+    public abstract void algoritmoOrdenamiento();
+    
+    public void ordenar() {
+        Long tInicio = System.currentTimeMillis();
+        algoritmoOrdenamiento();
+        Long tFinal = System.currentTimeMillis();
+        tiempo.setText(String.format("%.2f s", (tFinal - tInicio)/1000.0));
+    }
 
     public void actualizarBarra(int indice) {
-        double progress = indice / vector.length - 1;
-        int porcentajeProgreso = (int) progress * barraProgreso.getMaximum();
-        setProgress(barraProgreso, porcentajeProgreso);
-    }
-    
-    public int getPrimerIndice() {
-        return primerIndice;
-    }
-    
-    public JProgressBar getBarra() {
-        return barraProgreso;
+        double progress = (indice+1) / (double) vector.length; 
+        final int porcentajeProgreso = (int) (progress * barraProgreso.getMaximum());
+        this.barraProgreso.setValue(porcentajeProgreso);
+        
     }
 
     @Override
-    protected Void doInBackground() throws Exception {
-        metodoOrdenamiento();
-        return null;
-    }
-    
-    @Override
-    protected void process(java.util.List<Integer> chunks) {
-        int progress = chunks.get(chunks.size() - 1);
-        barraProgreso.setValue(progress);
-    }
-    
-    @Override
-    protected void done() {
-        JOptionPane.showMessageDialog(null, "Finalizado");
-    }
-    
-    private void setProgress(final JProgressBar progressBar, final int progress) {
-        SwingUtilities.invokeLater(() -> {
-            progressBar.setValue(progress);
-        });
+    public void run() {
+        ordenar();
+        latch.countDown();
     }
 }
